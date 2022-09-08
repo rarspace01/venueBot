@@ -5,8 +5,8 @@ name: booking slots
 
 on:
   schedule:
-    - cron: '50 7 * * *'
-    - cron: '50 8 * * *'
+    - cron: '30 7 * * *'
+    - cron: '30 8 * * *'
   workflow_dispatch:
 
 jobs:
@@ -59,7 +59,7 @@ jobs:
         env:
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          DURATION: "30"
+          DURATION: "45"
           BUCKET: ${{ matrix.bucket }}
         run: |
           java -jar venueBot-1.0-SNAPSHOT-all.jar
