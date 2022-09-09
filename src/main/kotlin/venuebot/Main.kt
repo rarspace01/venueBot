@@ -98,67 +98,71 @@ object Main {
     }
 
     private fun bookOneSlot(driver: WebDriver, webDriverWait: WebDriverWait, slot: Slot) {
-        val localDateForBooking = deductDateFromWeekday(slot.weekday)
+        try {
+            val localDateForBooking = deductDateFromWeekday(slot.weekday)
 
-        println("${Thread.currentThread()} trying to book slot: $slot for $localDateForBooking")
+            println("${Thread.currentThread()} trying to book slot: $slot for $localDateForBooking")
 
-        // booking start page
+            // booking start page
 
-        // append data
-        val nextButton = By.className("next")
-        driver.navigate().to("https://www.dres" + "den.de/apps_ext/Stras" + "senmusikApp_en/create-booking-userdata")
-        driver.findElement(nextButton).click()
+            // append data
+            val nextButton = By.className("next")
+            driver.navigate().to("https://www.dres" + "den.de/apps_ext/Stras" + "senmusikApp_en/create-booking-userdata")
+            driver.findElement(nextButton).click()
 
-        // add a new reservation
-        val addButton = By.className("add")
-        driver.findElement(addButton).click()
-        // Select time slot
-        val periodSelector = By.cssSelector("select")
-        val periodSelectorElement = driver.findElement(periodSelector)
-        val periodDropdown = Select(periodSelectorElement)
-        periodDropdown.options.filter { it.text.contains("${localDateForBooking.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} ${slot.localTime}") }
-            .map { it.click() }
-            .let {
-                if (it.isEmpty()) {
-                    println("${Thread.currentThread()} $slot time not available anymore")
-                    return
+            // add a new reservation
+            val addButton = By.className("add")
+            driver.findElement(addButton).click()
+            // Select time slot
+            val periodSelector = By.cssSelector("select")
+            val periodSelectorElement = driver.findElement(periodSelector)
+            val periodDropdown = Select(periodSelectorElement)
+            periodDropdown.options.filter { it.text.contains("${localDateForBooking.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} ${slot.localTime}") }
+                .map { it.click() }
+                .let {
+                    if (it.isEmpty()) {
+                        println("${Thread.currentThread()} $slot time not available anymore")
+                        return
+                    }
+                }
+            // check for venues
+            val slotsTable = By.className("responsiveTable")
+            webDriverWait.until(ExpectedConditions.presenceOfElementLocated(slotsTable))
+            val tableRecordSelector = By.cssSelector("table > tbody > tr")
+            val slotsEntries = driver.findElements(tableRecordSelector)
+
+            val selectedSlot = slotsEntries.filter {
+                if (it.text.contains("${slot.lot} - ")) {
+                    it.findElement(By.xpath(".//td[2]/div[2]")).text.contains("${slot.lot} - ")
+                } else false
+            }
+            var foundSlot = false
+            selectedSlot.map {
+                val slotRadioButton = it.findElement(By.xpath(".//td[1]/div[2]"))
+                val statusText = it.findElement(By.xpath(".//td[3]/div[2]"))
+                if (statusText.text.contains("available")) {
+                    slotRadioButton.click()
+                    foundSlot = true
+                } else {
+                    println("${Thread.currentThread()} $slot not available - [${statusText.text}]")
                 }
             }
-        // check for venues
-        val slotsTable = By.className("responsiveTable")
-        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(slotsTable))
-        val tableRecordSelector = By.cssSelector("table > tbody > tr")
-        val slotsEntries = driver.findElements(tableRecordSelector)
 
-        val selectedSlot = slotsEntries.filter {
-            if (it.text.contains("${slot.lot} - ")) {
-                it.findElement(By.xpath(".//td[2]/div[2]")).text.contains("${slot.lot} - ")
-            } else false
-        }
-        var foundSlot = false
-        selectedSlot.map {
-            val slotRadioButton = it.findElement(By.xpath(".//td[1]/div[2]"))
-            val statusText = it.findElement(By.xpath(".//td[3]/div[2]"))
-            if (statusText.text.contains("available")) {
-                slotRadioButton.click()
-                foundSlot = true
-            } else {
-                println("${Thread.currentThread()} $slot not available - [${statusText.text}]")
+            if (selectedSlot.isEmpty() && !foundSlot) {
+                println("${Thread.currentThread()} $slot not found")
+            } else if (foundSlot) {
+                // nextAfter Slot
+                val nextButtonSlots = By.className("next")
+                driver.findElement(nextButtonSlots).click()
+
+                // confirmBooking
+                val confirmBooking = By.className("next")
+                driver.findElement(confirmBooking).click()
+
+                println("${Thread.currentThread()} $slot should be booked")
             }
-        }
-
-        if (selectedSlot.isEmpty() && !foundSlot) {
-            println("${Thread.currentThread()} $slot not found")
-        } else if (foundSlot) {
-            // nextAfter Slot
-            val nextButtonSlots = By.className("next")
-            driver.findElement(nextButtonSlots).click()
-
-            // confirmBooking
-            val confirmBooking = By.className("next")
-            driver.findElement(confirmBooking).click()
-
-            println("${Thread.currentThread()} $slot should be booked")
+        } catch (exception: Exception) {
+            println("Exception in: $exception stack:\n${exception.stackTrace}")
         }
     }
 
