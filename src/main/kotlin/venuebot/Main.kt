@@ -38,7 +38,7 @@ object Main {
 
         val runHeadless = localString?.isBlank() != false
 
-        val numberOfThreads = if (runHeadless) 3 else 1
+        val numberOfThreads = if (runHeadless) 4 else 1
 
         for (i in 1..numberOfThreads) {
             thread(start = true) {
