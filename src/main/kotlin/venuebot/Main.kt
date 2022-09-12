@@ -151,9 +151,15 @@ object Main {
             if (selectedSlot.isEmpty() && !foundSlot) {
                 println("${Thread.currentThread()} $slot not found")
             } else if (foundSlot) {
-                // nextAfter Slot
+                // nextAfter Slot found
                 val nextButtonSlots = By.className("next")
                 driver.findElement(nextButtonSlots).click()
+
+                webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.className("add")))
+
+                if(!driver.pageSource.contains("Please check your entries")) {
+                    println("Not the page we page: ${driver.currentUrl} with ${driver.pageSource}")
+                }
 
                 // confirmBooking
                 val confirmBooking = By.className("next")
@@ -162,7 +168,7 @@ object Main {
                 println("${Thread.currentThread()} $slot should be booked")
             }
         } catch (exception: Exception) {
-            println("Exception in: $exception stack:\n${exception.stackTrace}")
+            println("Exception in: $exception stack:\n${exception.stackTrace} on page: ${driver.currentUrl} with ${driver.pageSource}")
         }
     }
 
