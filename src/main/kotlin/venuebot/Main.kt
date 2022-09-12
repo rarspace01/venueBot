@@ -45,6 +45,7 @@ object Main {
                 println("${Thread.currentThread()} has started.")
                 startWebDriver(runHeadless, username, password, bucket, started, durationOfBookingTime)
             }
+            sleep(1000)
         }
 
     }
