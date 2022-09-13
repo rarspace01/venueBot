@@ -6,13 +6,17 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.Select
 import org.openqa.selenium.support.ui.WebDriverWait
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.lang.Thread.sleep
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
+
 
 private const val LOGIN_PAGE = "https://www.dre" + "sden.de/apps_ext/Stras" + "senmusikApp_en/login"
 
@@ -87,7 +91,12 @@ object Main {
             listOf(slotsToBeBooked[bucket - 1])
         } else emptyList()
         if (slotsToBeBookedOnThisMachine.isEmpty()) println("no slots to be booked on this machine, canceling run")
+        val counter = AtomicLong()
         while (Duration.between(started, Instant.now()) < durationOfBookingTime && slotsToBeBookedOnThisMachine.isNotEmpty()) {
+            counter.incrementAndGet()
+            if((counter.get() % 10) == 0L) {
+                printMemoryInfo()
+            }
             slotsToBeBookedOnThisMachine.map {
                 val start = Instant.now()
                 bookOneSlot(driver, webDriverWait, it)
@@ -96,6 +105,23 @@ object Main {
         }
         driver.close()
         webDriverManager.quit()
+    }
+
+    private fun printMemoryInfo() {
+        val runtime = Runtime.getRuntime()
+
+        val br = BufferedReader(
+            InputStreamReader(runtime.exec("free -m").inputStream)
+        )
+
+        val text = br.readText().split("\n".toRegex())
+        val memLine = text.first { it.contains("Mem:") }
+
+        val memInfoList: List<String> = memLine.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
+        val totalSystemMemory = memInfoList[1].toInt()
+        val totalSystemUsedMemory = memInfoList[2].toInt()
+        val totalSystemFreeMemory = memInfoList[3].toInt()
+        println("MEM : USED: $totalSystemUsedMemory, FREE: $totalSystemFreeMemory MB, TOTAL: $totalSystemMemory MB")
     }
 
     private fun bookOneSlot(driver: WebDriver, webDriverWait: WebDriverWait, slot: Slot) {
@@ -158,7 +184,7 @@ object Main {
 
                 webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.className("add")))
 
-                if(!driver.pageSource.contains("Please check your entries")) {
+                if (!driver.pageSource.contains("Please check your entries")) {
                     println("Not the page we page: ${driver.currentUrl} with ${driver.pageSource}")
                 }
 
