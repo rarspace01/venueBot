@@ -83,7 +83,7 @@ object Main {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10))
 
         driver.manage().window().maximize()
-        val webDriverWait = WebDriverWait(driver, Duration.ofSeconds(5))
+        val webDriverWait = WebDriverWait(driver, Duration.ofSeconds(10))
 
         loginIntoPage(driver, webDriverWait, username, password)
         val slotsToBeBooked = SlotService().getSlotsToBeBooked()
