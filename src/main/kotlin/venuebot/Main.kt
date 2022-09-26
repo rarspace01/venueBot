@@ -184,7 +184,7 @@ object Main {
 
                 webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.className("add")))
 
-                if (!driver.pageSource.contains("Please check your entries")) {
+                if (!driver.pageSource.contains("list of all venues available")) {
                     println("Not the page we page: ${driver.currentUrl} with ${driver.pageSource}")
                 }
 
