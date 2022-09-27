@@ -193,6 +193,7 @@ object Main {
                 driver.findElement(confirmBooking).click()
 
                 println("${Thread.currentThread()} $slot should be booked")
+                sleep(5000)
             }
         } catch (exception: Exception) {
             println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with ${driver.pageSource}")
