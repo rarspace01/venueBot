@@ -195,7 +195,7 @@ object Main {
                 println("${Thread.currentThread()} $slot should be booked")
             }
         } catch (exception: Exception) {
-            println("Exception in: $exception stack:\n${exception.stackTrace} on page: ${driver.currentUrl} with ${driver.pageSource}")
+            println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with ${driver.pageSource}")
         }
     }
 
