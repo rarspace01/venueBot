@@ -1,6 +1,7 @@
 package venuebot
 
 import io.github.bonigarcia.wdm.WebDriverManager
+import org.jsoup.Jsoup
 import org.openqa.selenium.By
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -196,7 +197,9 @@ object Main {
                 sleep(5000)
             }
         } catch (exception: Exception) {
-            println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with title: ${driver.title}")
+            val pageSource = driver.pageSource
+            val textOfBody = Jsoup.parse(pageSource).body().text()
+            println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with title: ${driver.title} and text: $textOfBody")
         }
     }
 
