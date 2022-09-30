@@ -211,7 +211,7 @@ object Main {
                 driver.findElement(confirmBooking).click()
                 debugString += "next;"
 
-                println("${Thread.currentThread()} $slot should be booked")
+                println("${Thread.currentThread()} $slot should be booked debug[$debugString]")
                 sleep(5000)
             }
         } catch (exception: Exception) {
