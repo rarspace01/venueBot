@@ -126,9 +126,10 @@ object Main {
     }
 
     private fun bookOneSlot(driver: WebDriver, webDriverWait: WebDriverWait, slot: Slot) {
+        var debugString = ""
         try {
             val localDateForBooking = deductDateFromWeekday(slot.weekday)
-
+            debugString = "$slot $localDateForBooking $slot;"
             println("${Thread.currentThread()} trying to book slot: $slot for $localDateForBooking")
 
             // booking start page
@@ -138,15 +139,21 @@ object Main {
             driver.navigate().to("https://www.dres" + "den.de/apps_ext/Stras" + "senmusikApp_en/create-booking-userdata")
             driver.findElement(nextButton).click()
 
+            debugString += "next;"
+
             // add a new reservation
             val addButton = By.className("add")
             driver.findElement(addButton).click()
+            debugString += "add;"
             // Select time slot
             val periodSelector = By.cssSelector("select")
             val periodSelectorElement = driver.findElement(periodSelector)
             val periodDropdown = Select(periodSelectorElement)
             periodDropdown.options.filter { it.text.contains("${localDateForBooking.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} ${slot.localTime}") }
-                .map { it.click() }
+                .map {
+                    it.click()
+                    debugString += "clicked on ${it.text};"
+                }
                 .let {
                     if (it.isEmpty()) {
                         println("${Thread.currentThread()} $slot time not available anymore")
@@ -159,9 +166,11 @@ object Main {
             val tableRecordSelector = By.cssSelector("table > tbody > tr")
             val slotsEntries = driver.findElements(tableRecordSelector)
 
-            val selectedSlot = slotsEntries.filter {
-                if (it.text.contains("${slot.lot} - ")) {
-                    it.findElement(By.xpath(".//td[2]/div[2]")).text.contains("${slot.lot} - ")
+            val selectedSlot = slotsEntries.filter { webElement ->
+                if (webElement.text.contains("${slot.lot} - ")) {
+                    webElement.findElement(By.xpath(".//td[2]/div[2]")).text.contains("${slot.lot} - ").also {
+                        debugString += "found ${webElement.text};"
+                    }
                 } else false
             }
             var foundSlot = false
@@ -170,18 +179,22 @@ object Main {
                 val statusText = it.findElement(By.xpath(".//td[3]/div[2]"))
                 if (statusText.text.contains("available")) {
                     slotRadioButton.click()
+                    debugString += "selected slot available ${it.text} slotRadio: $slotRadioButton $statusText;"
                     foundSlot = true
                 } else {
+                    debugString += "selected slot unavailable ${it.text} slotRadio: $slotRadioButton $statusText;"
                     println("${Thread.currentThread()} $slot not available - [${statusText.text}]")
                 }
             }
 
             if (selectedSlot.isEmpty() && !foundSlot) {
                 println("${Thread.currentThread()} $slot not found")
+                debugString += "$slot not found;"
             } else if (foundSlot) {
                 // nextAfter Slot found
                 val nextButtonSlots = By.className("next")
                 driver.findElement(nextButtonSlots).click()
+                debugString += "next;"
 
                 webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.className("add")))
 
@@ -189,9 +202,14 @@ object Main {
                     println("Not the page we expected: ${driver.currentUrl} with title: ${driver.title}")
                 }
 
+                val pageSource = driver.pageSource
+                val textOfBody = Jsoup.parse(pageSource).body().text()
+                println("we will book on : $textOfBody")
+
                 // confirmBooking
                 val confirmBooking = By.className("next")
                 driver.findElement(confirmBooking).click()
+                debugString += "next;"
 
                 println("${Thread.currentThread()} $slot should be booked")
                 sleep(5000)
@@ -199,7 +217,7 @@ object Main {
         } catch (exception: Exception) {
             val pageSource = driver.pageSource
             val textOfBody = Jsoup.parse(pageSource).body().text()
-            println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with title: ${driver.title} and text: $textOfBody")
+            println("Exception in: $exception stack:\n${exception.stackTrace.map { it.toString() }} on page: ${driver.currentUrl} with title: ${driver.title} debug[$debugString] and text: $textOfBody")
         }
     }
 
