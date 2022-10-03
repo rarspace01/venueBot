@@ -204,15 +204,17 @@ object Main {
 
                 val pageSource = driver.pageSource
                 val textOfBody = Jsoup.parse(pageSource).body().text()
-                println("we will book on : $textOfBody")
+                println("we booked on : $textOfBody")
 
-                // confirmBooking
-                val confirmBooking = By.className("next")
-                driver.findElement(confirmBooking).click()
-                debugString += "next;"
+                if(!textOfBody.contains("${localDateForBooking.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} ${slot.localTime}")) {
+                    println("wrong time selected, we are going to cancel this booking")
+                    val cancelButton = By.className("cancel")
+                    driver.findElement(cancelButton).click()
+                    debugString += "cancel;"
+                    driver.switchTo().alert().accept();
+                }
 
                 println("${Thread.currentThread()} $slot should be booked debug[$debugString]")
-                sleep(5000)
             }
         } catch (exception: Exception) {
             val pageSource = driver.pageSource
