@@ -14,6 +14,7 @@ import java.time.DayOfWeek
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
@@ -22,6 +23,9 @@ import kotlin.concurrent.thread
 private const val LOGIN_PAGE = "https://www.dre" + "sden.de/apps_ext/Stras" + "senmusikApp_en/login"
 
 object Main {
+
+    private val loginTime: LocalDateTime = LocalDateTime.now().withHour(9).withMinute(57).withSecond(0)
+    private val bookingTime: LocalDateTime = LocalDateTime.now().withHour(10).withMinute(0).withSecond(0).withNano(500)
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -86,6 +90,10 @@ object Main {
         driver.manage().window().maximize()
         val webDriverWait = WebDriverWait(driver, Duration.ofSeconds(10))
 
+        println("Wait for login time")
+
+        waitUntil(loginTime)
+
         loginIntoPage(driver, webDriverWait, username, password)
         val slotsToBeBooked = SlotService().getSlotsToBeBooked()
         val slotsToBeBookedOnThisMachine = if (bucket == 0) slotsToBeBooked else if (slotsToBeBooked.size >= bucket) {
@@ -106,6 +114,12 @@ object Main {
         }
         driver.close()
         webDriverManager.quit()
+    }
+
+    private fun waitUntil(timeToWaitFor: LocalDateTime) {
+        while(timeToWaitFor.isAfter(LocalDateTime.now())){
+            sleep(50)
+        }
     }
 
     private fun printMemoryInfo() {
@@ -145,6 +159,9 @@ object Main {
             driver.findElement(addButton).click()
             debugString += "add;"
             // Select venue
+
+            println("Wait for booking time")
+            waitUntil(bookingTime)
 
             // switch to venue mode
             val venueMode = By.cssSelector("label[for*='FREE_TIME']")
