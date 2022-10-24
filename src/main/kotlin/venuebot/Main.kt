@@ -92,7 +92,7 @@ object Main {
 
         println("Wait for login time")
 
-        waitUntil(loginTime)
+        //waitUntil(loginTime)
 
         loginIntoPage(driver, webDriverWait, username, password)
         val slotsToBeBooked = SlotService().getSlotsToBeBooked()
@@ -161,7 +161,7 @@ object Main {
             // Select venue
 
             println("Wait for booking time")
-            waitUntil(bookingTime)
+            //waitUntil(bookingTime)
 
             // switch to venue mode
             val venueMode = By.cssSelector("label[for*='FREE_TIME']")
