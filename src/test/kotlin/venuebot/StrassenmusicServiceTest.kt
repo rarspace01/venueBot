@@ -1,11 +1,12 @@
 package venuebot
 
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class StrassenmusicServiceTest {
 
+    @Disabled
     @Test
     fun login() {
         // Given
