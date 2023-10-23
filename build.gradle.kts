@@ -20,7 +20,7 @@ dependencies {
     implementation("commons-io:commons-io:2.14.0")
     implementation("org.seleniumhq.selenium:selenium-java:4.14.1")
     implementation("io.github.bonigarcia:webdrivermanager:5.5.3")
-    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("org.jsoup:jsoup:1.16.2")
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
