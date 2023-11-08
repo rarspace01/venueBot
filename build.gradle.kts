@@ -19,7 +19,7 @@ repositories {
 dependencies {
     implementation("commons-io:commons-io:2.15.0")
     implementation("org.seleniumhq.selenium:selenium-java:4.15.0")
-    implementation("io.github.bonigarcia:webdrivermanager:5.6.1")
+    implementation("io.github.bonigarcia:webdrivermanager:5.6.2")
     implementation("org.jsoup:jsoup:1.16.2")
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
