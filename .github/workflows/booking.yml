@@ -35,7 +35,7 @@ jobs:
         run: ./gradlew shadowJar
       - run: |
           cp ./build/libs/venueBot-1.0-SNAPSHOT-all.jar ./venueBot-1.0-SNAPSHOT-all.jar
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: jvmArtifacts-${{ github.sha }}
           path: |
